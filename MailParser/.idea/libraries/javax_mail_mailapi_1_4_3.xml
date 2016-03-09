@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="javax.mail:mailapi:1.4.3" type="repository">
+    <properties maven-id="javax.mail:mailapi:1.4.3" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/mailapi-1.4.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/activation-1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
