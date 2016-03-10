@@ -3,10 +3,11 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.SET;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class PointSET {
     private SET<Point2D> pointsSET;
-    private static Node node;
+
     public PointSET()                               // construct an empty set of points
     {
         pointsSET = new SET<>();
@@ -36,26 +37,34 @@ public class PointSET {
     }
     public Iterable<Point2D> range(RectHV rect)             // all points that are inside the rectangle
     {
-        return new ArrayList<Point2D>();
+       ArrayList<Point2D> arr = new ArrayList<>();
+       Iterator<Point2D> it = pointsSET.iterator();
+        while (it.hasNext()) {
+            Point2D point = it.next();
+            if (point.x() <= rect.xmax() && point.x() >= rect.xmin() &&
+                    point.y() <= rect.ymax() && point.y() <= rect.ymin()) {
+                arr.add(point);
+            }
+        }
+        if (arr.size() != 0) return arr;
+        return null;
     }
     public Point2D nearest(Point2D p)             // a nearest neighbor in the set to point p; null if the set is empty
     {
-        return new Point2D(0, 0);
+        if (pointsSET.size() == 0) return null;
+
+        ArrayList<Point2D> arr = new ArrayList<>();
+        Iterator<Point2D> it = pointsSET.iterator();
+        Point2D nearest = it.next();
+        double nearDistance = Math.pow(nearest.x() - p.x(), 2) + Math.pow(nearest.y() - p.y(), 2);
+        while (it.hasNext()) {
+            Point2D point = it.next();
+            double distance = Math.pow(point.x() - p.x(), 2) + Math.pow(point.y() - p.y(), 2);
+            if (distance < nearDistance) nearest = point;
+            }
+        return nearest;
     }
 
-    private static class Node {
-        private Point2D p;      // the point
-        private RectHV rect;    // the axis-aligned rectangle corresponding to this node
-        private Node lb;        // the left/bottom subtree
-        private Node rt;        // the right/top subtree
-    Node(Point2D p, RectHV rect, Node lb, Node rt)
-    {
-        Node.this.lb = lb;
-        Node.this.p = p;
-        Node.this.rect = rect;
-        Node.this.rt = rt;
-    }
-    }
 
     public static void main(String[] args)                  // unit testing of the methods (optional)
     {
