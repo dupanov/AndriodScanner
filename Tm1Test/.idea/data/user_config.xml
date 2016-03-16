@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<user_profile>
+    <!--Whether to display a lot of info about selected cube\dimension\element in console -->
+    <debug>false</debug>
+    <!--IP or network name of AdminHost server -->
+    <AdminHost>localhost</AdminHost>
+    <tm1server>GO_New_Stores</tm1server>
+    <!--Number of sessions that will read & write cubes cubes specified in cubes_to_write and cubes_to_read sections -->
+    <number_of_sessions>2</number_of_sessions>
+    <!--Time lag each session will pause for after reading / writing. Each session waits for random period less than this specified number -->
+    <seconds_between_actions>60</seconds_between_actions>
+    <!--Add a list of user logins -->
+    <user_logins>
+        <user_login>
+            <login>admin</login>
+            <password>apple</password>
+        </user_login>
+
+    </user_logins>
+    <!--Cubes to write and read -->
+    <cubes_to_write>
+        <cube_to_write></cube_to_write>
+    </cubes_to_write>
+    <!--Read-only cubes - reports, etc -->
+    <cubes_to_read>
+        <cube_to_read></cube_to_read>
+    </cubes_to_read>
+    <!-- Dimension elements for writing & reading - add this to allow finer grained data writing\reading.
+    If you add a write dimension and a list of elements here, all writes will go this subset in all write cubes containing dimension.
+    The same holds for read dimensions specification.
+    -->
+    <dimensions_elements_selection>
+        <write_dimension_elements>
+            <!--Dimension name-->
+            <write_dimension></write_dimension>
+            <!--Add elements here. Add element principal names, not their Aliases -->
+            <write_elements>
+                <write_element></write_element>
+            </write_elements>
+        </write_dimension_elements>
+        <read_dimension_elements>
+            <!--Dimension name-->
+            <read_dimension></read_dimension>
+            <!--Add elements here. Add element principal names, not their Aliases -->
+            <read_elements>
+                <read_element></read_element>
+            </read_elements>
+        </read_dimension_elements>
+    </dimensions_elements_selection>
+</user_profile>
+

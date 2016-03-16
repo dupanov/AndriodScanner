@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="TM1JavaApi">
+    <CLASSES>
+      <root url="jar://C:/Program Files/ibm/cognos/tm1_64/bin/classes/TM1JavaApi.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
