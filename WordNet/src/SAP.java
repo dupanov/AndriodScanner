@@ -4,8 +4,8 @@ import edu.princeton.cs.algs4.*;
  * Created by admin on 24.03.2016.
  */
 public class SAP {
-    private Digraph G;
     private static final int INFINITY = Integer.MAX_VALUE;
+    private Digraph G;
     private MyBFS bfs;
 
     public SAP(Digraph G)
@@ -60,6 +60,7 @@ public class SAP {
 
     private class MyBFS {
         private final Digraph Graph;
+        private Stack<Integer> distToCash, markedCash;
         private boolean[] marked;  // marked[v] = is there an s->v path?
         private int[] edgeTo;      // edgeTo[v] = last edge on shortest s->v path
         private int[] distTo;      // distTo[v] = length of shortest s->v path
@@ -71,9 +72,13 @@ public class SAP {
             this.Graph = G;
             marked = new boolean[Graph.V()];
             distTo = new int[Graph.V()];
+            for (int v = 0; v < Graph.V(); v++)
+                distTo[v] = INFINITY;
             edgeTo = new int[Graph.V()];
             ancestor = INFINITY;
             path = INFINITY;
+            distToCash = new Stack<>();
+            markedCash  =new Stack<>();
         }
 
         public void bfs(int v, int w){
@@ -115,14 +120,10 @@ public class SAP {
         public void bfs(Iterable<Integer>v, Iterable<Integer> w) {
             BreadthFirstDirectedPaths bfs1 = new BreadthFirstDirectedPaths(G, v);
             BreadthFirstDirectedPaths bfs2 = new BreadthFirstDirectedPaths(G, w);
-            Queue<Integer> reversePost = new Queue<>();
             int minPath = INFINITY;
-           /* for (int i : v) {
-                marked = new boolean[Graph.V()];
-                distTo[i] = 0;
-            }*/
-            for (int j : v) {
-                reversePost = bfsaux(Graph, j);
+
+            for (int i : v) {
+                reversePost = bfsaux(Graph, i);
 
                 for (int k : reversePost) {
                     if (bfs1.hasPathTo(k)) {
@@ -152,14 +153,15 @@ public class SAP {
         }
 
         private Queue<Integer> bfsaux(Digraph Gr, int s) {
-            Queue<Integer> reversePost = new Queue<>();
-            marked = new boolean[Gr.V()];
-            distTo[s] = 0;
-            for (int v = 0; v < Gr.V(); v++)
-                distTo[v] = INFINITY;
+            while (!distToCash.isEmpty())
+                distTo[distToCash.pop()] = INFINITY;
+            while (!markedCash.isEmpty())
+                marked[markedCash.pop()] = false;
             Queue<Integer> q = new Queue<Integer>();
             marked[s] = true;
+            markedCash.push(s);
             distTo[s] = 0;
+            distToCash.push(s);
             q.enqueue(s);
             while (!q.isEmpty()) {
                 int v = q.dequeue();
@@ -167,7 +169,9 @@ public class SAP {
                     if (!marked[w]) {
                         edgeTo[w] = v;
                         distTo[w] = distTo[v] + 1;
+                        distToCash.push(w);
                         marked[w] = true;
+                        markedCash.push(w);
                         q.enqueue(w);
                         reversePost.enqueue(w);
                     }

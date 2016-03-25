@@ -76,6 +76,7 @@ public class WordNet {
     // is the word a WordNet noun?
     public boolean isNoun(String word)
     {
+        if (word == null) throw new NullPointerException();
         if (getSynset.contains(word)) return true;
         return false;
     }
@@ -84,6 +85,7 @@ public class WordNet {
     public int distance(String nounA, String nounB)
     {
         if (!isNoun(nounA) || !isNoun(nounB)) throw new IllegalArgumentException();
+        if (nounA == null || nounB == null) throw new NullPointerException();
 
         return sap.length(search(nounA), search(nounB));
     }
@@ -105,6 +107,7 @@ public class WordNet {
     public String sap(String nounA, String nounB)
     {
         if (!isNoun(nounA) || !isNoun(nounB)) throw new IllegalArgumentException();
+        if (nounA == null || nounB == null) throw new NullPointerException();
         int ancestor = sap.ancestor(search(nounA), search(nounB));
         return toString(synsetMap.get(ancestor));
     }
