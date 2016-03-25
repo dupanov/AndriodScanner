@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.ST;
  * Created by admin on 19.03.2016.
  */
 public class Outcast {
-    WordNet aWordnet;
+    private WordNet aWordnet;
     public Outcast(WordNet wordnet)         // constructor takes a WordNet object
     {
         this.aWordnet = wordnet;
@@ -13,10 +13,9 @@ public class Outcast {
     {
         ST<Integer,String> res = new ST<>();
 
-        String[] aNouns = nouns;
-        for (String noun: aNouns) {
+        for (String noun: nouns) {
             int distance = 0;
-            for (String secondNoun: aNouns) {
+            for (String secondNoun: nouns) {
 
                 distance +=aWordnet.distance(noun, secondNoun);
             }

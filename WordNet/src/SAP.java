@@ -1,114 +1,209 @@
-import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
-import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.*;
 
 /**
- * Created by Vadim on 19.03.2016.
+ * Created by admin on 24.03.2016.
  */
 public class SAP {
-    Digraph G, Gr;
-    BreadthFirstDirectedPaths bfs, bfsReverse;
-    final int graphTop = 38003;
+    private Digraph G;
+    private static final int INFINITY = Integer.MAX_VALUE;
+    private MyBFS bfs;
 
-    // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G)
     {
-        this.G = G;
-        Gr = G.reverse();
-
+        this.G = new Digraph(G);
+        bfs = new MyBFS(G);
     }
 
-    // length of shortest ancestral path between v and w; -1 if no such path
-    public int length(int v, int w)
-    {
-        MySearch sap = new MySearch(G, v);
 
-        int dist = sap.getDistance(w);
-        if (dist <= G.E()) return dist;
+    public int length(int v, int w) {
+
+        if (v == w) return 0;
+        MyBFS bfs = new MyBFS(G);
+        int minPath = bfs.getPath(v, w);
+        if (minPath <= G.V())return minPath;
         return -1;
+
     }
 
-    // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        MySearch sap = new MySearch(G, v);
-        return sap.getAncestor(w);
+        if (v == w) return v;
+        bfs = new MyBFS(G);
+        return bfs.getAncestor(v, w);
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w)
     {
-        int shortest = G.E() + 100000000;
-        for (int vertexV: v) {
-            MySearch searchPath = new MySearch(G, vertexV);
-            for (int vertexW: w) {
-                int s = searchPath.getDistance(vertexW);
-                if (s < shortest) shortest = s;
+        if (v == null || w == null ) throw new NullPointerException("Provide correct argument");
+        for (Integer i: v) {
+            for (Integer j: w) {
+                if (i == j) return 0;
             }
         }
-        if (shortest <= G.V()) return shortest;
-        return -1;
+
+        bfs = new MyBFS(G);
+        return bfs.getPath(v, w);
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w)
     {
-        int ancestor = -1;
-        for (int vertexV: v) {
-            MySearch searchPath = new MySearch(G, vertexV);
-            for (int vertexW: w) {
-                int tempAncestor = searchPath.getAncestor(vertexW);
-                MySearch searchPath2 = new MySearch(G, graphTop);
-                if (ancestor != -1 && searchPath2.getDistance(tempAncestor) < searchPath2.getDistance(ancestor)) ancestor = tempAncestor;
+        for (Integer i: v) {
+            for (Integer j: w) {
+                if (i == j) return i;
             }
         }
-        if (ancestor <= G.V()) return ancestor;
-        return -1;
+        if (v == null || w == null ) throw new NullPointerException("Provide correct argument");
+        bfs = new MyBFS(G);
+        return bfs.getAncestor(v, w);
     }
 
-    private class MySearch {
-        Digraph G, Gr;
-        BreadthFirstDirectedPaths bfs, bfsReverse;
-        Iterable<Integer> pathToV;
-        int ancestor, dist;
-        MySearch(Digraph G, int v)
-        {
-            this.G = G;
-            Gr = G.reverse();
-            ancestor = 0;
-            bfs = new BreadthFirstDirectedPaths(G, v);
-            pathToV = bfs.pathTo(graphTop);
+    private class MyBFS {
+        private final Digraph Graph;
+        private boolean[] marked;  // marked[v] = is there an s->v path?
+        private int[] edgeTo;      // edgeTo[v] = last edge on shortest s->v path
+        private int[] distTo;      // distTo[v] = length of shortest s->v path
+        private Queue<Integer> reversePost;
+        private int ancestor;
+        private int path;
+
+        MyBFS(Digraph G){
+            this.Graph = G;
+            marked = new boolean[Graph.V()];
+            distTo = new int[Graph.V()];
+            edgeTo = new int[Graph.V()];
+            ancestor = INFINITY;
+            path = INFINITY;
         }
 
-       public BreadthFirstDirectedPaths pathV(int w) {
-            for (int vertex : pathToV) {
-                bfsReverse = new BreadthFirstDirectedPaths(Gr, vertex);
-                if (bfsReverse.hasPathTo(w)) {
-                    ancestor = vertex;
-                    return bfsReverse;
+        public void bfs(int v, int w){
+        if (v == w) {
+            path = 0;
+            return;
+        }
+        BreadthFirstDirectedPaths bfs1 = new BreadthFirstDirectedPaths(Graph, v);
+        BreadthFirstDirectedPaths bfs2 = new BreadthFirstDirectedPaths(Graph, w);
+
+        reversePost = bfsaux(Graph, v);
+        int minPath = INFINITY;
+        for (int j: reversePost) {
+            if (bfs2.hasPathTo(j)) {
+                int path = bfs1.distTo(j) + bfs2.distTo(j);
+                if (path < minPath) {
+                    minPath = path;
+                    ancestor = j;
                 }
             }
-           return null;
         }
 
+            reversePost = bfsaux(Graph, w);
 
-        public int getAncestor(int w) {
-            pathV(w);
-            if (ancestor <= G.E()) return ancestor;
-            return -1;
-        }
+            for (int j: reversePost) {
+                if (bfs1.hasPathTo(j)) {
+                    int path = bfs1.distTo(j) + bfs2.distTo(j);
+                    if (path < minPath) {
+                        minPath = path;
+                        ancestor = j;
+                    }
+                }
+            }
 
-        public int getDistance(int w) {
-            pathV(w);
-            int result = bfs.distTo(ancestor) + bfsReverse.distTo(w);
-            if (result < G.E()) return result;
-            return -1;
-        }
-
-
+        if (minPath <= Graph.V()) path = minPath;
+        else path = -1;
     }
 
-    // do unit testing of this class
-    public static void main(String[] args)
-    {
+        public void bfs(Iterable<Integer>v, Iterable<Integer> w) {
+            BreadthFirstDirectedPaths bfs1 = new BreadthFirstDirectedPaths(G, v);
+            BreadthFirstDirectedPaths bfs2 = new BreadthFirstDirectedPaths(G, w);
+            Queue<Integer> reversePost = new Queue<>();
+            int minPath = INFINITY;
+           /* for (int i : v) {
+                marked = new boolean[Graph.V()];
+                distTo[i] = 0;
+            }*/
+            for (int j : v) {
+                reversePost = bfsaux(Graph, j);
 
+                for (int k : reversePost) {
+                    if (bfs1.hasPathTo(k)) {
+                        int path = bfs1.distTo(k) + bfs2.distTo(k);
+                        if (path >= 0 && path < minPath) {
+                            minPath = path;
+                            ancestor = k;
+                        }
+                    }
+                }
+            }
+                for (int j : w) {
+                    reversePost = bfsaux(Graph, j);
+
+                    for (int k : reversePost) {
+                        if (bfs2.hasPathTo(k)) {
+                            int path = bfs1.distTo(k) + bfs2.distTo(k);
+                            if (path >= 0 && path < minPath) {
+                                minPath = path;
+                                ancestor = k;
+                            }
+                        }
+                    }
+            }
+            if (minPath <= Graph.V()) path = minPath;
+            else path = -1;
+        }
+
+        private Queue<Integer> bfsaux(Digraph Gr, int s) {
+            Queue<Integer> reversePost = new Queue<>();
+            marked = new boolean[Gr.V()];
+            distTo[s] = 0;
+            for (int v = 0; v < Gr.V(); v++)
+                distTo[v] = INFINITY;
+            Queue<Integer> q = new Queue<Integer>();
+            marked[s] = true;
+            distTo[s] = 0;
+            q.enqueue(s);
+            while (!q.isEmpty()) {
+                int v = q.dequeue();
+                for (int w : Gr.adj(v)) {
+                    if (!marked[w]) {
+                        edgeTo[w] = v;
+                        distTo[w] = distTo[v] + 1;
+                        marked[w] = true;
+                        q.enqueue(w);
+                        reversePost.enqueue(w);
+                    }
+                }
+            }
+            return reversePost;
+        }
+
+
+        public int getAncestor(int v, int w) {
+            ancestor = INFINITY;
+            bfs(v, w);
+            if (ancestor <= Graph.V()) return ancestor;
+            else return -1;
+        }
+
+        public int getAncestor(Iterable<Integer> v, Iterable<Integer> w) {
+            ancestor = INFINITY;
+            bfs(v, w);
+            if (ancestor <= Graph.V()) return ancestor;
+            else return -1;
+        }
+
+        public int getPath(int v, int w) {
+            ancestor = INFINITY;
+            bfs(v, w);
+            if (path <= Graph.E()) return path;
+            else return -1;
+        }
+
+        public int getPath(Iterable<Integer> v, Iterable<Integer> w) {
+            ancestor = INFINITY;
+            bfs(v, w);
+            if (path <= Graph.E()) return path;
+            else return -1;
+        }
     }
+
 }
