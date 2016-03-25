@@ -10,6 +10,7 @@ public class SAP {
 
     public SAP(Digraph G)
     {
+
         this.G = new Digraph(G);
         bfs = new MyBFS(G);
     }

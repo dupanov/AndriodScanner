@@ -106,6 +106,7 @@ public class WordNet {
 
     public String sap(String nounA, String nounB)
     {
+
         if (!isNoun(nounA) || !isNoun(nounB)) throw new IllegalArgumentException();
         if (nounA == null || nounB == null) throw new NullPointerException();
         int ancestor = sap.ancestor(search(nounA), search(nounB));
