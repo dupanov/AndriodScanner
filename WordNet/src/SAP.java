@@ -36,11 +36,11 @@ public class SAP {
     public int length(Iterable<Integer> v, Iterable<Integer> w)
     {
         if (v == null || w == null ) throw new NullPointerException("Provide correct argument");
-        for (Integer i: v) {
-            for (Integer j: w) {
-                if (i == j) return 0;
-            }
-        }
+  //      for (Integer i: v) {
+    //        for (Integer j: w) {
+      //          if (i == j) return 0;
+       //     }
+       // }
 
         bfs = new MyBFS(G);
         return bfs.getPath(v, w);
@@ -49,11 +49,11 @@ public class SAP {
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w)
     {
-        for (Integer i: v) {
-            for (Integer j: w) {
-                if (i == j) return i;
-            }
-        }
+       // for (Integer i: v) {
+       //     for (Integer j: w) {
+       //         if (i == j) return i;
+       //     }
+       // }
         if (v == null || w == null ) throw new NullPointerException("Provide correct argument");
         bfs = new MyBFS(G);
         return bfs.getAncestor(v, w);
@@ -61,30 +61,31 @@ public class SAP {
 
     private class MyBFS {
         private final Digraph Graph;
-        private Stack<Integer> distToCash, markedCash;
-        private boolean[] marked;  // marked[v] = is there an s->v path?
-        private int[] edgeTo;      // edgeTo[v] = last edge on shortest s->v path
-        private int[] distTo;      // distTo[v] = length of shortest s->v path
+        private Stack<Integer> markedCash;
+        private ST<Integer, Boolean> marked;  // marked[v] = is there an s->v path?
+     //   private int[] edgeTo;      // edgeTo[v] = last edge on shortest s->v path
+     //   private int[] distTo;      // distTo[v] = length of shortest s->v path
         private Queue<Integer> reversePost;
         private int ancestor;
         private int path;
 
         MyBFS(Digraph G){
             this.Graph = G;
-            marked = new boolean[Graph.V()];
-            distTo = new int[Graph.V()];
-            for (int v = 0; v < Graph.V(); v++)
-                distTo[v] = INFINITY;
-            edgeTo = new int[Graph.V()];
+            marked = new ST<>();
+           // distTo = new int[Graph.V()];
+           // for (int v = 0; v < Graph.V(); v++)
+           //     distTo[v] = INFINITY;
+           // edgeTo = new int[Graph.V()];
             ancestor = INFINITY;
             path = INFINITY;
-            distToCash = new Stack<>();
+          //  distToCash = new Stack<>();
             markedCash  =new Stack<>();
         }
 
         public void bfs(int v, int w){
         if (v == w) {
             path = 0;
+            ancestor = v;
             return;
         }
         BreadthFirstDirectedPaths bfs1 = new BreadthFirstDirectedPaths(Graph, v);
@@ -119,6 +120,18 @@ public class SAP {
     }
 
         public void bfs(Iterable<Integer>v, Iterable<Integer> w) {
+            for (int i: v) {
+                for (int j: w) {
+                    if (i == j) {
+                        path = 0;
+                        ancestor = i;
+                        return;
+                    }
+                }
+            }
+
+
+
             BreadthFirstDirectedPaths bfs1 = new BreadthFirstDirectedPaths(G, v);
             BreadthFirstDirectedPaths bfs2 = new BreadthFirstDirectedPaths(G, w);
             int minPath = INFINITY;
@@ -154,31 +167,29 @@ public class SAP {
         }
 
         private Queue<Integer> bfsaux(Digraph Gr, int s) {
-            while (!distToCash.isEmpty())
-                distTo[distToCash.pop()] = INFINITY;
             while (!markedCash.isEmpty())
-                marked[markedCash.pop()] = false;
-            Queue<Integer> q = new Queue<Integer>();
-            marked[s] = true;
+                marked.put(markedCash.pop(), false);
+            Queue<Integer> q = new Queue<>();
+            Queue<Integer> result = new Queue<>();
+            marked.put(s, true);
             markedCash.push(s);
-            distTo[s] = 0;
-            distToCash.push(s);
+
             q.enqueue(s);
             while (!q.isEmpty()) {
                 int v = q.dequeue();
                 for (int w : Gr.adj(v)) {
-                    if (!marked[w]) {
-                        edgeTo[w] = v;
-                        distTo[w] = distTo[v] + 1;
-                        distToCash.push(w);
-                        marked[w] = true;
+                    if (marked.get(w) == null || !marked.get(w)) {
+             //           edgeTo[w] = v;
+            //            distTo[w] = distTo[v] + 1;
+              //          distToCash.push(w);
+                        marked.put(w, true);
                         markedCash.push(w);
                         q.enqueue(w);
-                        reversePost.enqueue(w);
+                        result.enqueue(w);
                     }
                 }
             }
-            return reversePost;
+            return result;
         }
 
 
